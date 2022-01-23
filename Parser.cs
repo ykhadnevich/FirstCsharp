@@ -121,9 +121,7 @@ namespace FirstCsharp
                     if (operators.Count > 0)
                     {
                         op = operators.Peek();
-                        if((op.Type == TokenType.Multiply ||
-                         op.Type == TokenType.Divide) && (token.Type != TokenType.Multiply ||
-                         token.Type != TokenType.Divide))
+                        if(GetPriority(op.Type) > GetPriority(token.Type))
                             output.Enqueue(operators.Pop());
                     }
                     operators.Push(token);
@@ -152,6 +150,24 @@ namespace FirstCsharp
 
             return output;
         }
+
+        public static int GetPriority(TokenType token)
+        {
+            switch (token)
+            {
+                case TokenType.Multiply:
+                case TokenType.Divide:
+                    return 1;
+                case TokenType.Power:
+                    return 2;
+
+                default: return 0;
+
+            }
+           
+        }
+
+
         public double InterpretRpn(Queue<Token> tokens)
         {
             Stack<double> numbers = new();
@@ -179,10 +195,16 @@ namespace FirstCsharp
                             numbers.Push(num1 * num2);
                             break;
                         case TokenType.Divide:
-                            numbers.Push(num1 / num2);
+                            Console.WriteLine($"divide: {num1} / {num2}");
+                            if (num2 == 0)
+                            {
+                                numbers.Push(double.PositiveInfinity);
+                                var result = num1 / num2;
+                            }
+                            else numbers.Push(num1 / num2);
                             break;
                         case TokenType.Power:
-                            numbers.Push((int)Math.Pow(num1, num2));
+                            numbers.Push(Math.Pow(num1, num2));
                             break;
                     }
                 }
